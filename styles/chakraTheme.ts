@@ -13,6 +13,6 @@ export const chakraTheme = extendTheme({
     brand: "black",
     success: "#4DFFA9",
     warning: "#D1FF4D",
-    alert: "##FF54B0",
+    alert: "#FF54B0",
   },
 });

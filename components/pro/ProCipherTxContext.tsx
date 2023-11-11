@@ -8,8 +8,6 @@ import {
   useState,
 } from "react";
 import {
-  CipherBaseCoin,
-  CipherCoinInfo,
   CipherOutputCoin,
   CipherOutputCoinInfo,
   CipherTransferableCoin,
@@ -22,7 +20,13 @@ import {
   PublicInfoStruct,
 } from "../../lib/cipher/types/CipherContract.type";
 import dayjs from "dayjs";
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
+import { WriteContractResult } from "@wagmi/core";
 import { ConfigContext } from "../../providers/ConfigProvider";
 import CipherAbi from "../../lib/cipher/CipherAbi.json";
 import { DEFAULT_NATIVE_TOKEN_ADDRESS } from "../../configs/tokenConfig";
@@ -44,7 +48,11 @@ export const CipherTxProviderContext = createContext<{
   totalPrivateOutAmt: bigint;
   downloadCipherCodes: () => void;
   prepareProof: () => Promise<void>;
+  transactTx: WriteContractResult | undefined;
+  transactIsLoading: boolean;
+  transactIsSuccess: boolean;
   sendTransaction: () => Promise<void>;
+  transactReset: () => void;
 }>({
   publicInAmt: BigInt(0),
   setPublicInAmt: () => {},
@@ -60,7 +68,11 @@ export const CipherTxProviderContext = createContext<{
   totalPrivateOutAmt: BigInt(0),
   downloadCipherCodes: () => {},
   prepareProof: async () => {},
+  transactTx: undefined,
+  transactIsLoading: false,
+  transactIsSuccess: false,
   sendTransaction: async () => {},
+  transactReset: () => {},
 });
 
 export const CipherTxProvider = ({
@@ -120,13 +132,19 @@ export const CipherTxProvider = ({
     args: [utxoData, publicInfo],
     value: tokenAddress === DEFAULT_NATIVE_TOKEN_ADDRESS ? publicInAmt : 0n,
     enabled: utxoData && publicInfo ? true : false,
-    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
+    type: cipherContractInfo?.legacyTx ? "legacy" : undefined,
   });
+
   const {
     data: transactTx,
-    writeAsync: transactASync,
-    reset: transactRest,
+    writeAsync: transactAsync,
+    reset: transactReset,
   } = useContractWrite(contractTxConfig);
+
+  const { isLoading: transactIsLoading, isSuccess: transactIsSuccess } =
+    useWaitForTransaction({
+      hash: transactTx?.hash,
+    });
 
   /** */
   const validate = useCallback(() => {
@@ -196,78 +214,42 @@ export const CipherTxProvider = ({
   }, [privateOutCoins, toast, tokenAddress, validate]);
 
   const prepareProof = async () => {
-    try {
-      console.log({
+    await validate();
+
+    const { promise } = await syncAndGetCipherTree(tokenAddress!);
+    const treeCache = await promise;
+
+    const privateOutCoinArr = privateOutCoins.map(
+      (coinInfo) => new CipherOutputCoin(coinInfo!, tokenAddress!)
+    );
+    const publicInfo: PublicInfoStruct = {
+      maxAllowableFeeRate: "0",
+      recipient: address as string,
+      // recipient: recipient || "",
+      token: tokenAddress!,
+      deadline: dayjs().add(1, "month").unix().toString(),
+    };
+
+    const result = await generateCipherTx(
+      treeCache.cipherTree,
+      {
         publicInAmt,
         publicOutAmt,
-        privateInCoins,
-        privateOutCoins,
-        recipient,
-        totalPrivateInAmt,
-        totalPrivateOutAmt,
-      });
+        privateInCoins: privateInCoins as CipherTransferableCoin[],
+        privateOutCoins: privateOutCoinArr,
+      },
+      publicInfo
+    );
 
-      await validate();
-
-      const { promise } = await syncAndGetCipherTree(tokenAddress!);
-      const treeCache = await promise;
-
-      const privateOutCoinArr = privateOutCoins.map(
-        (coinInfo) => new CipherOutputCoin(coinInfo!, tokenAddress!)
-      );
-      const publicInfo: PublicInfoStruct = {
-        maxAllowableFeeRate: "0",
-        recipient: address as string,
-        // recipient: recipient || "",
-        token: tokenAddress!,
-        deadline: dayjs().add(1, "month").unix().toString(),
-      };
-
-      const result = await generateCipherTx(
-        treeCache.cipherTree,
-        {
-          publicInAmt,
-          publicOutAmt,
-          privateInCoins: privateInCoins as CipherTransferableCoin[],
-          privateOutCoins: privateOutCoinArr,
-        },
-        publicInfo
-      );
-
-      console.log({
-        result,
-      });
-
-      setUtxoData(result.contractCalldata.utxoData);
-      setPublicInfo(result.contractCalldata.publicInfo);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top",
-      });
-    }
+    setUtxoData(result.contractCalldata.utxoData);
+    setPublicInfo(result.contractCalldata.publicInfo);
   };
 
   const sendTransaction = async () => {
-    if (!utxoData || !publicInfo || !transactASync) {
+    if (!utxoData || !publicInfo || !transactAsync) {
       throw new Error("proof or publicInfo is undefined");
     }
-    try {
-      await transactASync?.();
-    } catch (err) {
-      toast({
-        title: "Deposit failed",
-        description: "",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top",
-      });
-    }
+    await transactAsync();
   };
 
   return (
@@ -287,7 +269,11 @@ export const CipherTxProvider = ({
         totalPrivateOutAmt,
         downloadCipherCodes,
         prepareProof,
+        transactTx,
+        transactIsLoading,
+        transactIsSuccess,
         sendTransaction,
+        transactReset,
       }}
     >
       {children}

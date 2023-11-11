@@ -117,7 +117,7 @@ export default function PrivateOutputItem(props: Props) {
               value={numberInputValue}
             >
               <NumberInputField
-                placeholder="Deposit Amount"
+                placeholder="Shield Amount"
                 borderRadius={"full"}
                 bgColor={"whiteAlpha.400"}
                 _focus={{ borderColor: "white" }}

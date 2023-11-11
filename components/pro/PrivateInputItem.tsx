@@ -28,7 +28,7 @@ export default function PrivateInputItem(props: Props) {
     selectedTokenAddress: selectedToken.address,
     defaultCipherCode: props.cipherCode,
   });
-  const [isValid, setIsValid] = useState<boolean>(true);
+  // const [isValid, setIsValid] = useState<boolean>(true);
 
   const debouncedCipherCode = useDebounce(cipherCode, 800);
 
@@ -49,15 +49,15 @@ export default function PrivateInputItem(props: Props) {
     checkValid();
   }, [debouncedCipherCode]);
 
-  useEffect(() => {
-    if (!error && transferableCoin) {
-      setIsValid(true);
-    } else if (!error) {
-      setIsValid(true);
-    } else {
-      setIsValid(false);
-    }
-  }, [error, transferableCoin]);
+  // useEffect(() => {
+  //   if (!error && transferableCoin) {
+  //     setIsValid(true);
+  //   } else if (!error) {
+  //     setIsValid(true);
+  //   } else {
+  //     setIsValid(false);
+  //   }
+  // }, [error, transferableCoin]);
 
   const handleCipherCodeChange = (str: string) => {
     setCipherCode(str);
@@ -76,7 +76,7 @@ export default function PrivateInputItem(props: Props) {
         <CipherCard
           value={cipherCode}
           onValueChange={(str) => handleCipherCodeChange(str)}
-          placeholder={`Drag or enter your cipher code`}
+          placeholder={`Enter your cipher code`}
         />
         {/* <button
           onClick={() => {
@@ -85,7 +85,7 @@ export default function PrivateInputItem(props: Props) {
         >
           check
         </button> */}
-        {isValid ? (
+        {!error ? (
           <Flex
             className="flex flex-row justify-between px-8"
             color="whiteAlpha.700"
@@ -101,7 +101,7 @@ export default function PrivateInputItem(props: Props) {
           </Flex>
         ) : (
           <Text className="px-8" color="rgba(255, 157, 169, 1)">
-            Invalid cipher code!
+            {error.message}
           </Text>
         )}
       </Flex>

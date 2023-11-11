@@ -81,7 +81,14 @@ export default function ConfirmModal(props: Props) {
   const { chain } = useNetwork();
   const { address } = useAccount();
   const { cipherContractInfo } = useContext(ConfigContext);
-  const { prepareProof, sendTransaction } = useContext(CipherTxProviderContext);
+  const {
+    prepareProof,
+    transactTx,
+    transactIsLoading,
+    transactIsSuccess,
+    sendTransaction,
+    transactReset,
+  } = useContext(CipherTxProviderContext);
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [isDownloaded, setIsDownloaded] = useState<boolean>(false);
   const { activeStep, setActiveStep } = useSteps({
@@ -112,7 +119,7 @@ export default function ConfirmModal(props: Props) {
       selectedToken.address !== DEFAULT_NATIVE_TOKEN_ADDRESS
         ? true
         : false,
-    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
+    type: cipherContractInfo?.legacyTx ? "legacy" : undefined,
   });
   // approve
   const {
@@ -211,8 +218,34 @@ export default function ConfirmModal(props: Props) {
     }
   }, [isApproved]);
 
+  useEffect(() => {
+    if (transactIsSuccess) {
+      toast({
+        title: "Transaction success",
+        description: "",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+      transactReset();
+      customizeClose();
+    }
+  }, [transactIsSuccess]);
+
   const onSendTransaction = useCallback(async () => {
-    await sendTransaction?.();
+    try {
+      await sendTransaction();
+    } catch (err) {
+      toast({
+        title: "Transaction failed",
+        description: "",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
   }, [onPrepareProof, sendTransaction]);
 
   const handleIsChecked = () => {
@@ -227,7 +260,7 @@ export default function ConfirmModal(props: Props) {
     }
   };
 
-  const handleCloseModal = () => {
+  const customizeClose = () => {
     setIsChecked(false);
     setIsDownloaded(false);
     setActiveStep(0);
@@ -239,7 +272,7 @@ export default function ConfirmModal(props: Props) {
 
   const downloadCipherCodeByIndex = async (index: number) => {
     const coin = privateOutCoins[index];
-    if(!coin) {
+    if (!coin) {
       throw new Error("privateInCoins is undefined");
     }
 
@@ -251,14 +284,14 @@ export default function ConfirmModal(props: Props) {
       userId: coin.key.userId,
     });
     await downloadCipher(cipherCode);
-  }
+  };
 
   return (
     <Modal
       closeOnOverlayClick={false}
       isOpen={isOpen}
       size="5xl"
-      onClose={handleCloseModal}
+      onClose={customizeClose}
     >
       <ModalOverlay />
       <ModalContent
@@ -525,32 +558,48 @@ export default function ConfirmModal(props: Props) {
             <Button
               className="w-1/2 py-6 m-auto"
               borderRadius="full"
-              textColor={activeStep === 3 ? "black" : "whiteAlpha.400"}
-              bgColor={activeStep === 3 ? "white" : "whiteAlpha.400"}
+              textColor={
+                activeStep !== 3 || transactIsLoading
+                  ? "whiteAlpha.400"
+                  : "black"
+              }
+              bgColor={
+                activeStep !== 3 || transactIsLoading
+                  ? "whiteAlpha.400"
+                  : "white"
+              }
               _hover={
-                activeStep === 3
+                activeStep !== 3 || transactIsLoading
                   ? {
+                      cursor: "not-allowed",
+                    }
+                  : {
                       transform: "scale(1.05)",
                       bgColor: "white",
                       textColor: "brand",
                     }
-                  : {
-                      cursor: "not-allowed",
-                    }
               }
               _active={
-                activeStep === 3
+                activeStep !== 3 || transactIsLoading
                   ? {
-                      transform: "scale(0.95)",
+                      cursor: "not-allowed",
                     }
                   : {
-                      cursor: "not-allowed",
+                      transform: "scale(0.95)",
                     }
               }
               transitionDuration={"0.2s"}
-              onClick={activeStep === 3 ? onSendTransaction : undefined}
+              onClick={
+                activeStep !== 3 || transactIsLoading
+                  ? undefined
+                  : onSendTransaction
+              }
             >
-              Send transaction
+              {transactIsLoading ? (
+                <Spinner size="md" color="whiteAlpha.500" boxSize={6} />
+              ) : (
+                "Send transaction"
+              )}
             </Button>
           </ModalFooter>
         </ModalBody>
