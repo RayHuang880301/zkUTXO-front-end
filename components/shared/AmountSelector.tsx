@@ -1,9 +1,7 @@
 import { Button, Flex, NumberInput, NumberInputField } from "@chakra-ui/react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { formatUnits, parseUnits } from "viem";
+import React, { useCallback, useMemo, useState } from "react";
+import { parseUnits } from "viem";
 import { TokenConfig } from "../../type";
-
-const amountTable = [0.01, 0.1, 1, 10];
 
 type Props = {
   // amount: bigint | undefined;
@@ -68,7 +66,7 @@ export default function AmountSelector(props: Props) {
   const AmtBtnComponents = useMemo(() => {
     return (
       <Flex className="gap-2 my-1 w-full justify-between">
-        {amountTable.map((selectedAmt) => (
+        {selectedToken.amountTable.map((selectedAmt) => (
           <Button
             key={selectedAmt}
             borderRadius="2xl"

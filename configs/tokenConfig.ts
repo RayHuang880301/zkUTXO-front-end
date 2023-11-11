@@ -29,12 +29,14 @@ export const MAINNET_TOKEN_CONFIG: TokenConfig[] = [
     address: DEFAULT_NATIVE_TOKEN_ADDRESS,
     symbol: "ETH",
     decimals: 18,
+    amountTable: [0.01, 0.1, 1, 10],
   },
   {
     iconUri: btcIcon,
     address: MAINNET_ADDRESS.BTC,
     symbol: "BTC",
     decimals: 8,
+    amountTable: [0.001, 0.01, 0.1, 1],
   },
 ];
 
@@ -44,18 +46,21 @@ export const GOERLI_TOKEN_CONFIG: TokenConfig[] = [
     address: DEFAULT_NATIVE_TOKEN_ADDRESS,
     symbol: "ETH",
     decimals: 18,
+    amountTable: [0.01, 0.1, 1, 10],
   },
   {
     iconUri: btcIcon,
     address: GOERLI_ADDRESS.WBTC,
     symbol: "WBTC",
     decimals: 8,
+    amountTable: [0.001, 0.01, 0.1, 1],
   },
   {
     iconUri: usdcIcon,
     address: GOERLI_ADDRESS.USDC,
     symbol: "USDC",
     decimals: 6,
+    amountTable: [1, 10, 100, 1000],
   },
 ];
 
@@ -65,17 +70,20 @@ export const ARBITRUM_GOERLI_TOKEN_CONFIG: TokenConfig[] = [
     address: DEFAULT_NATIVE_TOKEN_ADDRESS,
     symbol: "ETH",
     decimals: 18,
+    amountTable: [0.01, 0.1, 1, 10],
   },
   {
     iconUri: wethIcon,
     address: ARBITRUM_GOERLI_ADDRESS.WETH,
     symbol: "WETH",
     decimals: 18,
+    amountTable: [0.01, 0.1, 1, 10],
   },
   {
     iconUri: usdcIcon,
     address: ARBITRUM_GOERLI_ADDRESS.USDC,
     symbol: "USDC",
     decimals: 6,
+    amountTable: [1, 10, 100, 1000],
   },
 ];

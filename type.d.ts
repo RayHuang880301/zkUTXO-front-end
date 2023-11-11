@@ -29,6 +29,7 @@ export type TokenConfig = {
   address: `0x${string}`;
   symbol: string;
   decimals: number;
+  amountTable: number[];
 };
 
 export type CipherAccount = {
