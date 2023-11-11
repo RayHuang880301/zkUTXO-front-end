@@ -57,7 +57,7 @@ export default function WithdrawCard(props: Props) {
         setPubOutAmt(cipherCodeResult.amount);
         setRandom(cipherCodeResult.random);
         if (cipherCodeResult.userId) {
-          const seed = BigInt(cipherAccount!.seed as string);
+          const seed = cipherAccount!.seed;
           setSalt(seed);
         } else {
           setSalt(cipherCodeResult.salt);
@@ -76,7 +76,7 @@ export default function WithdrawCard(props: Props) {
         position: "top",
       });
     }
-  }, [debouncedCipherCode, selectedToken]);
+  }, [cipherAccount, debouncedCipherCode, selectedToken, toast]);
 
   const onValueChange = (value: string) => {
     setIsValidCode(false);

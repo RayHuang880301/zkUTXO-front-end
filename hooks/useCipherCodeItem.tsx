@@ -64,7 +64,8 @@ const parseCipherCode = async (
     }
     const cipherData = decodeCipherCode(cipherCode);
     assertCipherCode(cipherData, tokenAddress, BigInt(cipherAccount.userId || '0'));
-    const saltOrSeed = cipherData.userId ? BigInt(cipherAccount.seed as string) : cipherData.salt as bigint;
+    if(!cipherAccount.seed) throw new Error('Invalid cipher account seed');
+    const saltOrSeed = cipherData.userId ? cipherAccount.seed : cipherData.salt as bigint;
 
     const commitment = generateCommitment({
       amount: cipherData.amount,
