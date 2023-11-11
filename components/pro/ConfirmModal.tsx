@@ -233,6 +233,14 @@ export default function ConfirmModal(props: Props) {
     onClose();
   };
 
+  const downloadCipherCodeByIndex = async (index: number) => {
+    const cipherCode = privateInCoins[index]?.toCipherCode();
+    if(!cipherCode) {
+      throw new Error("privateInCoins is undefined");
+    }
+    await downloadCipher(cipherCode);
+  }
+
   return (
     <Modal
       closeOnOverlayClick={false}
@@ -342,7 +350,7 @@ export default function ConfirmModal(props: Props) {
                                   transform: "scale(0.9)",
                                 }}
                                 transitionDuration={"0.2s"}
-                                //TODO: download cipher code
+                                onClick={() => downloadCipherCodeByIndex(index)}
                               >
                                 <Image
                                   boxSize={4}

@@ -5,6 +5,7 @@ import {
   indicesToPathIndices,
   generateNullifier,
   toHashedSalt,
+  encodeCipherCode,
 } from "./CipherHelper";
 import { assert } from "../helper";
 
@@ -54,8 +55,17 @@ export class CipherTransferableCoin extends CipherBaseCoin {
     super(coinInfo);
     this.tree = tree;
     this.leafId = leafId;
-    // TODO: Implement only hashedSaltOrUserId
     assert(this.coinInfo.key.inSaltOrSeed, "privKey should not be null");
+  }
+
+  toCipherCode(): string {
+    return encodeCipherCode({
+      amount: this.coinInfo.amount,
+      salt: this.coinInfo.key.inSaltOrSeed,
+      random: this.coinInfo.key.inRandom,
+      userId: 0n,
+      tokenAddress: this.tree.tokenAddress,
+    });
   }
 
   getPathIndices() {
@@ -94,6 +104,17 @@ export class CipherOwnershipCoin extends CipherBaseCoin {
     this.tree = tree;
     this.leafId = leafId;
     assert(this.coinInfo.key.hashedSaltOrUserId, "hashedSaltOrUserId should not be null");
+  }
+
+  toCipherCode(): string {
+    return encodeCipherCode({
+      amount: this.coinInfo.amount,
+      // NOTE: Only owner(userId) can decode this cipherCode
+      salt: 0n,
+      random: this.coinInfo.key.inRandom,
+      userId: this.coinInfo.key.hashedSaltOrUserId,
+      tokenAddress: this.tree.tokenAddress,
+    });
   }
 
   getPathIndices() {
