@@ -2,7 +2,7 @@ import {
   CipherCoinInfo,
   CipherTransferableCoin,
   CipherBaseCoin,
-  CipherOwnershipCoin,
+  CipherOutputCoin,
 } from "./CipherCoin";
 import { PoseidonHash } from "../poseidonHash";
 import {
@@ -62,7 +62,7 @@ export interface CipherTxRequest {
   publicInAmt: bigint;
   publicOutAmt: bigint;
   privateInCoins: CipherTransferableCoin[];
-  privateOutCoins: CipherBaseCoin[];
+  privateOutCoins: CipherOutputCoin[];
 }
 
 export async function prepareCipherTx(
@@ -86,7 +86,7 @@ export async function generateCipherTx(
   }: CipherTxRequest,
   publicInfo: PublicInfoStruct
 ) {
-  const transferableCoins: CipherOwnershipCoin[] = [];
+  const outputCoins: CipherOutputCoin[] = [];
   const newTree = tree.copyCipherTree();
   const currentRoot = newTree.root;
 
@@ -133,28 +133,19 @@ export async function generateCipherTx(
 
   for (let index = 0; index < privateOutputLength; index++) {
     const coin = privateOutCoins[index];
-    assert(coin.coinInfo.key.inRandom, "inRandom should not be null");
-    assert(coin.coinInfo.key.hashedSaltOrUserId, "hashedSaltOrUserId should not be null");
-    const leafId = newTree.nextIndex;
-    const payableCoin = new CipherOwnershipCoin({
-      amount: coin.coinInfo.amount,
-      key: {
-        inSaltOrSeed: coin.coinInfo.key.inSaltOrSeed,
-        hashedSaltOrUserId: coin.coinInfo.key.hashedSaltOrUserId,
-        inRandom: coin.coinInfo.key.inRandom,
-      }
-    }, newTree, leafId);
-    newTree.insert(payableCoin.getCommitment());
-    transferableCoins.push(payableCoin);
+    assert(coin.coinInfo.key.random, "inRandom should not be null");
+    assert(coin.hashedSaltOrUserId, "hashedSaltOrUserId should not be null");
+    newTree.insert(coin.getCommitment());
+    outputCoins.push(coin);
   }
   const circuitUtxoOutput = {
     // Coin Outputs
-    outputCommitment: transferableCoins.map((coin) => coin.getCommitment()),
-    outAmount: transferableCoins.map((coin) => coin.coinInfo.amount),
-    outHashedSaltOrUserId: transferableCoins.map(
-      (coin) => coin.coinInfo.key.hashedSaltOrUserId
+    outputCommitment: outputCoins.map((coin) => coin.getCommitment()),
+    outAmount: outputCoins.map((coin) => coin.coinInfo.amount),
+    outHashedSaltOrUserId: outputCoins.map(
+      (coin) => coin.hashedSaltOrUserId as bigint
     ),
-    outRandom: transferableCoins.map((coin) => coin.coinInfo.key.inRandom),
+    outRandom: outputCoins.map((coin) => coin.coinInfo.key.random),
   };
   /** Circuit input */
   const publicInfoHash = toPublicInfoHash(publicInfo);
@@ -189,7 +180,7 @@ export async function generateCipherTx(
       inputNullifiers: privateInCoins.map((coin) =>
         utils.hexlify(coin.getNullifier())
       ),
-      outputCommitments: transferableCoins.map((coin) =>
+      outputCommitments: outputCoins.map((coin) =>
         utils.hexlify(coin.getCommitment())
       ),
     },
@@ -199,7 +190,7 @@ export async function generateCipherTx(
     tree: newTree,
     privateInputLength,
     privateOutputLength,
-    transferableCoins,
+    transferableCoins: outputCoins,
     circuitInput,
     currentRoot,
     newRoot: newTree.root,

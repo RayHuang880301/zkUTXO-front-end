@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { formatUnits, parseUnits } from "viem";
-import { CipherCoinInfo } from "../../lib/cipher/CipherCoin";
+import { CipherCoinInfo, CipherOutputCoinInfo } from "../../lib/cipher/CipherCoin";
 import { getRandomSnarkField } from "../../utils/getRandom";
 import { encodeCipherCode, toHashedSalt } from "../../lib/cipher/CipherHelper";
 import addUser from "../../assets/images/addUser.png";
@@ -26,7 +26,7 @@ const amountTable = [0.01, 0.1, 1, 10];
 
 type Props = {
   selectedToken: TokenConfig;
-  onUpdateCoin?: (coin: CipherCoinInfo | null) => void;
+  onUpdateCoin?: (coin: CipherOutputCoinInfo | null) => void;
 };
 
 export default function PrivateOutputItem(props: Props) {
@@ -40,11 +40,11 @@ export default function PrivateOutputItem(props: Props) {
   >();
   const [userId, setUserId] = useState<string>();
   const [show, setShow] = useState(false);
-  const [cipherCoinInfo, setCipherCoinInfo] = useState<CipherCoinInfo>({
+  const [cipherCoinInfo, setCipherCoinInfo] = useState<CipherOutputCoinInfo>({
     key: {
-      hashedSaltOrUserId: 0n,
-      inSaltOrSeed: 0n,
-      inRandom: 0n,
+      salt: 0n,
+      userId: 0n,
+      random: 0n,
     },
     amount: 0n,
   });
@@ -71,17 +71,15 @@ export default function PrivateOutputItem(props: Props) {
       amount: debouncedPubInAmt,
       salt: userId ? BigNumber.from(0) : getRandomSnarkField(),
       random: getRandomSnarkField(),
-      userId: userId ? BigInt(userId) : BigNumber.from(0),
+      userId: userId ? BigNumber.from(userId) : BigNumber.from(0),
     };
     const encodedData = encodeCipherCode(data);
     setCipherCode(encodedData);
-    const coin: CipherCoinInfo = {
+    const coin: CipherOutputCoinInfo = {
       key: {
-        hashedSaltOrUserId: userId
-          ? BigInt(userId)
-          : toHashedSalt(data.salt.toBigInt()),
-        inSaltOrSeed: data.salt.toBigInt(),
-        inRandom: data.random.toBigInt(),
+        userId: data.userId.toBigInt(),
+        salt: data.salt.toBigInt(),
+        random: data.random.toBigInt(),
       },
       amount: debouncedPubInAmt,
     };

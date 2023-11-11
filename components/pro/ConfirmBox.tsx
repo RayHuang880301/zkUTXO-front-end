@@ -12,6 +12,8 @@ import { TokenConfig } from "../../type";
 import ConfirmModal from "./ConfirmModal";
 import {
   CipherCoinInfo,
+  CipherOutputCoin,
+  CipherOutputCoinInfo,
   CipherTransferableCoin,
 } from "../../lib/cipher/CipherCoin";
 import { useAccount } from "wagmi";
@@ -23,7 +25,7 @@ type Props = {
   totalPrivateOutAmt: bigint;
   selectedToken: TokenConfig;
   privateInCoins: Array<CipherTransferableCoin | null>;
-  privateOutCoins: Array<CipherCoinInfo | null>;
+  privateOutCoins: Array<CipherOutputCoinInfo | null>;
 };
 
 export default function ConfirmBox(props: Props) {

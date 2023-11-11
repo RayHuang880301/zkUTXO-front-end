@@ -27,6 +27,8 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import { TokenConfig } from "../../type";
 import {
   CipherCoinInfo,
+  CipherOutputCoin,
+  CipherOutputCoinInfo,
   CipherTransferableCoin,
 } from "../../lib/cipher/CipherCoin";
 import { formatUnits } from "viem";
@@ -45,6 +47,7 @@ import { useAllowance } from "../../hooks/useAllowance";
 import { CipherTxProviderContext } from "./ProCipherTxContext";
 import downloadImg1 from "../../assets/images/download1.png";
 import { downloadCipher } from "../../lib/downloadCipher";
+import { encodeCipherCode } from "../../lib/cipher/CipherHelper";
 
 const steps = [
   { title: "Approve Token", description: "Approve token for deposit" },
@@ -60,7 +63,7 @@ type Props = {
   publicInAmt: bigint;
   publicOutAmt: bigint;
   privateInCoins: Array<CipherTransferableCoin | null>;
-  privateOutCoins: Array<CipherCoinInfo | null>;
+  privateOutCoins: Array<CipherOutputCoinInfo | null>;
 };
 
 export default function ConfirmModal(props: Props) {
@@ -234,10 +237,18 @@ export default function ConfirmModal(props: Props) {
   };
 
   const downloadCipherCodeByIndex = async (index: number) => {
-    const cipherCode = privateInCoins[index]?.toCipherCode();
-    if(!cipherCode) {
+    const coin = privateOutCoins[index];
+    if(!coin) {
       throw new Error("privateInCoins is undefined");
     }
+
+    const cipherCode = encodeCipherCode({
+      tokenAddress: selectedToken.address,
+      amount: coin.amount,
+      random: coin.key.random,
+      salt: coin.key.salt,
+      userId: coin.key.userId,
+    });
     await downloadCipher(cipherCode);
   }
 

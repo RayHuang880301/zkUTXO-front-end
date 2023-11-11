@@ -2,7 +2,7 @@ import { Button, Flex, Image, useToast } from "@chakra-ui/react";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { TokenConfig } from "../../type";
 import { CipherTxProviderContext } from "./ProCipherTxContext";
-import { CipherBaseCoin, CipherCoinInfo } from "../../lib/cipher/CipherCoin";
+import { CipherOutputCoinInfo } from "../../lib/cipher/CipherCoin";
 import PrivateOutputItem from "./PrivateOutputItem";
 import dropImg from "../../assets/images/drop.png";
 
@@ -10,7 +10,7 @@ const mOutsNum = [0, 1, 2, 4];
 const mOutsMax = 4;
 
 interface InputItemInterface {
-  coin: CipherCoinInfo | undefined;
+  coin: CipherOutputCoinInfo | null;
   Element: React.JSX.Element;
 }
 
@@ -27,11 +27,11 @@ export default function PrivateOutputBox(props: Props) {
   );
 
   const [coinInfoMap, setCoinInfoMap] = useState<
-    Map<string, CipherCoinInfo | null>
+    Map<string, CipherOutputCoinInfo | null>
   >(new Map());
 
   useEffect(() => {
-    const coins: Array<CipherCoinInfo | null> = [];
+    const coins: Array<CipherOutputCoinInfo | null> = [];
     for (let index = 0; index < mOuts; index++) {
       const coin = coinInfoMap.get(index.toString()) || null;
       coins.push(coin);
@@ -42,12 +42,12 @@ export default function PrivateOutputBox(props: Props) {
   const outCoinInfoItems = useMemo(() => {
     const items: InputItemInterface[] = [];
     for (let index = 0; index < mOuts; index++) {
-      const onUpdateCoin = (coin: CipherCoinInfo | null) => {
+      const onUpdateCoin = (coin: CipherOutputCoinInfo | null) => {
         console.log("onUpdateCoin", index, coin);
         setCoinInfoMap((prev) => new Map(prev).set(index.toString(), coin));
       };
       const item: InputItemInterface = {
-        coin: undefined,
+        coin: null,
         Element: (
           <PrivateOutputItem
             key={index}

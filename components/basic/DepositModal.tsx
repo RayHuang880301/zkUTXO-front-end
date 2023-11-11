@@ -25,7 +25,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { TokenConfig } from "../../type";
 import CipherCard from "../shared/CipherCard";
 import dayjs from "dayjs";
-import { CipherBaseCoin, CipherCoinInfo } from "../../lib/cipher/CipherCoin";
+import { CipherBaseCoin, CipherCoinInfo, CipherOutputCoin } from "../../lib/cipher/CipherCoin";
 import { generateCipherTx } from "../../lib/cipher/CipherCore";
 import { CipherTree } from "../../lib/cipher/CipherTree";
 import { erc20ABI, useAccount, useNetwork, useWaitForTransaction } from "wagmi";
@@ -315,7 +315,14 @@ export default function DepositModal(props: Props) {
         publicOutAmt: 0n,
         privateInCoins: [],
         // TODO: get leafId
-        privateOutCoins: [new CipherBaseCoin(cipherCoinInfo)],
+        privateOutCoins: [new CipherOutputCoin({
+          key: {
+            salt: cipherCoinInfo.key.inSaltOrSeed!,
+            random: cipherCoinInfo.key.inRandom,
+            userId: 0n,
+          },
+          amount: cipherCoinInfo.amount,
+        }, tree.tokenAddress)],
       },
       {
         // TODO: get maxAllowableFeeRate from relay info

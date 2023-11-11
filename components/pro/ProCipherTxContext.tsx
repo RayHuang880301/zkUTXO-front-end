@@ -10,6 +10,8 @@ import {
 import {
   CipherBaseCoin,
   CipherCoinInfo,
+  CipherOutputCoin,
+  CipherOutputCoinInfo,
   CipherTransferableCoin,
 } from "../../lib/cipher/CipherCoin";
 import { useToast } from "@chakra-ui/react";
@@ -34,8 +36,8 @@ export const CipherTxProviderContext = createContext<{
   setPublicOutAmt: Dispatch<SetStateAction<bigint>>;
   privateInCoins: Array<CipherTransferableCoin | null>;
   setPrivateInCoins: (coins: Array<CipherTransferableCoin | null>) => void;
-  privateOutCoins: Array<CipherCoinInfo | null>;
-  setPrivateOutCoins: (coins: Array<CipherCoinInfo | null>) => void;
+  privateOutCoins: Array<CipherOutputCoinInfo | null>;
+  setPrivateOutCoins: (coins: Array<CipherOutputCoinInfo | null>) => void;
   recipient: string | null;
   setRecipient: (recipient: string | null) => void;
   totalPrivateInAmt: bigint;
@@ -81,7 +83,7 @@ export const CipherTxProvider = ({
     Array<CipherTransferableCoin | null>
   >([]);
   const [privateOutCoins, setPrivateOutCoins] = useState<
-    Array<CipherCoinInfo | null>
+    Array<CipherOutputCoinInfo | null>
   >([]);
   const [recipient, setRecipient] = useState<string | null>("");
 
@@ -170,22 +172,11 @@ export const CipherTxProvider = ({
     try {
       await validate();
       const privateOutCoinArr = privateOutCoins.map(
-        (coinInfo) => new CipherBaseCoin(coinInfo as CipherCoinInfo)
+        (coinInfo) => new CipherOutputCoin(coinInfo!, tokenAddress!)
       );
 
       const allCodes = privateOutCoinArr.map((coin) => {
-        if (!coin.coinInfo.key.inSaltOrSeed) {
-          throw new Error("Invalid coin info");
-        }
-        if (!coin.coinInfo.key.inRandom) {
-          throw new Error("Invalid coin info");
-        }
-        return encodeCipherCode({
-          tokenAddress: tokenAddress!,
-          amount: coin.coinInfo.amount,
-          salt: coin.coinInfo.key.inSaltOrSeed,
-          random: coin.coinInfo.key.inRandom,
-        });
+        return coin.toCipherCode();
       });
 
       for (let i = 0; i < allCodes.length; i++) {
@@ -221,7 +212,7 @@ export const CipherTxProvider = ({
       const treeCache = await promise;
 
       const privateOutCoinArr = privateOutCoins.map(
-        (coinInfo) => new CipherBaseCoin(coinInfo as CipherCoinInfo)
+        (coinInfo) => new CipherOutputCoin(coinInfo!, tokenAddress!)
       );
       const publicInfo: PublicInfoStruct = {
         maxAllowableFeeRate: "0",

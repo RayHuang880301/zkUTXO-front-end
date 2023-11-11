@@ -20,6 +20,17 @@ export interface CipherCoinInfo {
   amount: bigint;
 }
 
+export interface CipherOutputCoinKey {
+  salt: bigint;
+  random: bigint;
+  userId: bigint;
+}
+
+export interface CipherOutputCoinInfo{
+  key: CipherOutputCoinKey;
+  amount: bigint;
+}
+
 export class CipherBaseCoin {
   coinInfo!: CipherCoinInfo;
 
@@ -63,7 +74,7 @@ export class CipherTransferableCoin extends CipherBaseCoin {
       amount: this.coinInfo.amount,
       salt: this.coinInfo.key.inSaltOrSeed,
       random: this.coinInfo.key.inRandom,
-      userId: 0n,
+      userId: this.coinInfo.key.hashedSaltOrUserId,
       tokenAddress: this.tree.tokenAddress,
     });
   }
@@ -95,39 +106,59 @@ export class CipherTransferableCoin extends CipherBaseCoin {
   }
 }
 
-export class CipherOwnershipCoin extends CipherBaseCoin {
-  readonly tree!: CipherTree;
-  readonly leafId!: number;
+export class CipherOutputCoin {
+  readonly tokenAddress!: string;
+  readonly coinInfo!: CipherOutputCoinInfo;
 
-  constructor(coinInfo: CipherCoinInfo, tree: CipherTree, leafId: number) {
-    super(coinInfo);
-    this.tree = tree;
-    this.leafId = leafId;
-    assert(this.coinInfo.key.hashedSaltOrUserId, "hashedSaltOrUserId should not be null");
+  constructor(coinInfo: CipherOutputCoinInfo, tokenAddress: string) {
+    this.coinInfo = coinInfo;
+    this.tokenAddress = tokenAddress;
+
+    assert(this.coinInfo.key.random > 0n, "random should not be 0");
+    if(this.coinInfo.key.salt === 0n && this.coinInfo.key.userId !== 0n) {
+      throw new Error("salt should be 0 and userId should not be 0");
+    }
+
+    if(this.coinInfo.key.userId === 0n && this.coinInfo.key.salt === 0n) {
+      throw new Error("salt and userId should not be 0");
+    }
+  }
+
+  get hashedSaltOrUserId(): bigint {
+    if(this.coinInfo.key.salt === 0n && this.coinInfo.key.userId !== 0n) {
+      return this.coinInfo.key.userId;
+    }
+    if(this.coinInfo.key.salt !== 0n) {
+      return toHashedSalt(this.coinInfo.key.salt);
+    }
+    throw new Error("salt and userId should not be 0");
   }
 
   toCipherCode(): string {
     return encodeCipherCode({
       amount: this.coinInfo.amount,
-      // NOTE: Only owner(userId) can decode this cipherCode
-      salt: 0n,
-      random: this.coinInfo.key.inRandom,
-      userId: this.coinInfo.key.hashedSaltOrUserId,
-      tokenAddress: this.tree.tokenAddress,
+      salt: this.coinInfo.key.salt,
+      random: this.coinInfo.key.random,
+      userId: this.coinInfo.key.userId,
+      tokenAddress: this.tokenAddress,
     });
   }
 
-  getPathIndices() {
-    const { indices } = this.tree.genMerklePath(Number(this.leafId));
-    return indicesToPathIndices(indices);
-  }
-
-  getPathElements() {
-    const { pathElements } = this.tree.genMerklePath(Number(this.leafId));
-    assert(
-      pathElements.every((v) => v.length === 1),
-      "pathElements each length should be 1"
-    );
-    return pathElements.map((v) => v[0]);
+  getCommitment() {
+    if(this.coinInfo.key.salt === 0n && this.coinInfo.key.userId !== 0n) {
+      return generateCommitment({
+        amount: this.coinInfo.amount,
+        hashedSalt: this.coinInfo.key.userId,
+        random: this.coinInfo.key.random,
+      });
+    }
+    if(this.coinInfo.key.salt !== 0n) {
+      return generateCommitment({
+        amount: this.coinInfo.amount,
+        salt: this.coinInfo.key.salt,
+        random: this.coinInfo.key.random,
+      });
+    }
+    throw new Error("salt and userId should not be 0");
   }
 }
