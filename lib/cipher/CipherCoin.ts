@@ -115,7 +115,7 @@ export class CipherOutputCoin {
     this.tokenAddress = tokenAddress;
 
     assert(this.coinInfo.key.random > 0n, "random should not be 0");
-    if(this.coinInfo.key.salt === 0n && this.coinInfo.key.userId !== 0n) {
+    if(this.coinInfo.key.salt === 0n && this.coinInfo.key.userId === 0n) {
       throw new Error("salt should be 0 and userId should not be 0");
     }
 
