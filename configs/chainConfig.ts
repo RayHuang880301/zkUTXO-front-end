@@ -1,6 +1,6 @@
 import { ChainConfig } from "../type";
 import { getBigInt, getNumber, getString } from "../utils/helper";
-import { mainnet, goerli, arbitrumGoerli, scrollSepolia } from "wagmi/chains";
+import { mainnet, goerli, arbitrumGoerli, scrollSepolia, mantleTestnet } from "wagmi/chains";
 
 // TODO: MIGRATE FROM .env
 export const getChainConfig = (chainId: number): ChainConfig | undefined => {
@@ -13,8 +13,10 @@ export const getChainConfig = (chainId: number): ChainConfig | undefined => {
       return ARBITRUM_GOERLI_CONFIG;
     case scrollSepolia.id:
       return SCROLL_SEPOLIA_CONFIG;
+    case mantleTestnet.id:
+      return MANTLE_TESTNET_CONFIG;
     default:
-      return undefined;
+      throw new Error(`ChainId ${chainId} not supported`);
   }
 };
 
