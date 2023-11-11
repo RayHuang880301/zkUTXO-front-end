@@ -4,8 +4,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import { Mode } from "../../type";
 import ModeTab from "./ModeTab";
 import CipherProfileBtn from "./CipherProfileBtn";
-import { useAccount } from "wagmi";
-import logo from "../../assets/images/logo1.png";
+import logo from "../../assets/images/logo2.png";
 
 type Props = {
   setMode: Dispatch<SetStateAction<Mode>>;
@@ -23,7 +22,7 @@ export default function Header(props: Props) {
       <Box className="py-2 w-[30%]">
         <Image
           src={logo.src}
-          h={8}
+          h={10}
           _hover={{
             cursor: "pointer",
             transform: "scale(1.1)",
