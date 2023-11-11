@@ -33,7 +33,7 @@ export type TokenConfig = {
 };
 
 export type CipherAccount = {
-  seed: string | undefined;
+  seed: bigint | undefined;
   userId: string | undefined;
 };
 

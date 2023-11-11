@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { CipherAccount } from "../type";
+import { toHashedSalt, userSignatureToCipherAccount } from "../lib/cipher/CipherHelper";
 const poseidon = require("poseidon-encryption");
 
 export const useCipherAccount = () => {
@@ -27,15 +28,11 @@ export const useCipherAccount = () => {
 
   useEffect(() => {
     if (isSuccess && signature) {
-      const seed = signature;
-      const userId = poseidon.poseidon([seed]).toString();
-      setCipherAccount({
-        seed: seed,
-        userId: userId,
-      });
+      const cipherAccount = userSignatureToCipherAccount(signature);
+      setCipherAccount(cipherAccount);
       setIsAuthenticated(true);
     }
-  }, [isSuccess]);
+  }, [isSuccess, signature]);
 
   const breakAuthUser = () => {
     setCipherAccount({

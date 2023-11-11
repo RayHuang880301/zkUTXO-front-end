@@ -1,8 +1,11 @@
 import { BigNumber, utils } from "ethers";
-import { SNARK_FIELD_SIZE } from "./CipherConfig";
+import { CIPHER_ACCOUNT_SEED_ITERATION, SNARK_FIELD_SIZE } from "./CipherConfig";
 import { PoseidonHash } from "../poseidonHash";
 import { assert } from "../helper";
 import { CipherTree } from "./CipherTree";
+import { CipherAccount } from "../../type";
+import { keccak256 } from 'viem'
+
 export const FIELD_SIZE_BIGINT = BigInt(SNARK_FIELD_SIZE);
 
 export interface EncodeCipherCodeInterface {
@@ -19,6 +22,22 @@ export interface DecodeCipherCodeResult {
   salt?: bigint;
   random: bigint;
   userId?: bigint;
+}
+
+export function userSignatureToCipherAccount(signature: `0x${string}`): CipherAccount {
+  if(!signature) {
+    throw new Error("signature invalid");
+  }
+  for (let index = 0; index < CIPHER_ACCOUNT_SEED_ITERATION; index++) {
+    signature = keccak256(signature);
+  }
+  const seed = BigInt(signature) % FIELD_SIZE_BIGINT;
+  const userId = toHashedSalt(seed).toString();
+  
+  return {
+    seed,
+    userId,
+  }
 }
 
 export function getUtxoType(nIn: number, mOut: number): string {

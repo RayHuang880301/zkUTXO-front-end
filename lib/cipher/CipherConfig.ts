@@ -7,6 +7,8 @@ export const DEFAULT_LEAF_ZERO_VALUE =
 export const DEFAULT_NATIVE_TOKEN_ADDRESS =
   "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
+export const CIPHER_ACCOUNT_SEED_ITERATION = 100;
+
 export const DEFAULT_PRIVATE_KEY = "0x00";
 
 export const DEFAULT_TREE_HEIGHT = 24;
