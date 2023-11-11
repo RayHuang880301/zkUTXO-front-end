@@ -105,7 +105,7 @@ export default function ProContainer() {
                   onSendTransaction={sendTransaction}
                 />
                 <Flex className="flex flex-row justify-between rounded-3xl my-8 grid-cols-2 gap-8">
-                  <Flex className="w-1/2 md:w-full">
+                  <Flex className="w-1/2">
                     <PrivateInputBox selectedToken={selectedToken} />
                     {/* <Box className="my-4 px-8 py-2 mx-auto bg-slate-300 rounded-3xl">
                       <AmountSelector
@@ -118,7 +118,7 @@ export default function ProContainer() {
                       />
                     </Box> */}
                   </Flex>
-                  <Flex className="w-1/2 md:w-full">
+                  <Flex className="w-1/2">
                     <PrivateOutputBox selectedToken={selectedToken} />
                     {/* <Box className="my-4 py-2 px-8 mx-auto bg-slate-300 rounded-3xl">
                       <PublicOutput

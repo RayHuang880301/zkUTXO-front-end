@@ -210,7 +210,7 @@ export default function PrivateOutputItem(props: Props) {
         color="whiteAlpha.700"
       >
         <Text className="w-full">Specified recipient&apos;s user ID:</Text>
-        <Text className="whitespace-nowrap px-2" overflow={"scroll"}>
+        <Text className="whitespace-nowrap px-2 w-4/5" overflow={"scroll"}>
           {userId ? userId : "None"}
         </Text>
       </Flex>
