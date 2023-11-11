@@ -3,6 +3,7 @@ import ethIcon from "../assets/icon/ethereum-pos.png";
 import btcIcon from "../assets/icon/wrapped-bitcoin.png";
 import usdcIcon from "../assets/icon/usd-coin-wormhole-from-ethereum.png";
 import wethIcon from "../assets/icon/wrapped-ethereum.png";
+import mntIcon from "../assets/icon/mnt.png";
 
 export const SNARK_FIELD_SIZE =
   "21888242871839275222246405745257275088548364400416034343698204186575808495617";
@@ -100,9 +101,9 @@ export const SCROLL_SEPOLIA_TOKEN_CONFIG: TokenConfig[] = [
 
 export const MANTLE_TESTNET_TOKEN_CONFIG: TokenConfig[] = [
   {
-    iconUri: ethIcon,
+    iconUri: mntIcon,
     address: DEFAULT_NATIVE_TOKEN_ADDRESS,
-    symbol: "ETH",
+    symbol: "MNT",
     decimals: 18,
     amountTable: [0.01, 0.1, 1, 10],
   },
