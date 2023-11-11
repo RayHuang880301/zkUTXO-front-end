@@ -216,6 +216,24 @@ export class CipherTreeDataCollector {
   
     return treeCacheItem;
   }
+
+  async syncNewCommitmentFromRpcWithRawLogs(
+    treeCacheItem: TreeCacheItem,
+    context: TreeSyncingQueueContext
+  ): Promise<TreeCacheItem> {
+    const publicClient = context.publicClient;
+    const logs = await publicClient.getLogs({
+      address: this.config.cipherContractAddress,
+      fromBlock: context.currentStartBlock,
+      toBlock: context.currentEndBlock,
+    })
+
+    console.log({
+      logs,
+    })
+    
+    return treeCacheItem;
+  }
 }
 
 export async function updateCipherTreeFromEvents(
@@ -278,16 +296,40 @@ export async function getCipherCommitmentLogs(
   fromBlock: bigint,
   toBlock: bigint
 ) {
-  const filter = await publicClient.createEventFilter({
+  try {
+    const filter = await publicClient.createEventFilter({
+      address: cipherContractAddress as any as `0x${string}`,
+      event: NewCommitmentAbiItem,
+      fromBlock,
+      toBlock,
+    });
+  
+    const logs = await publicClient.getFilterLogs({
+      filter,
+    });
+    return logs;
+  } catch (error: any) {
+    if(error.code === -32601) {
+      // the method eth_newFilter does not exist/is not available
+      console.warn("eth_newFilter is not available, try eth_getLogs");
+      return await getCipherRawLogs(publicClient, cipherContractAddress, fromBlock, toBlock);
+    }
+    throw error;
+  }
+}
+
+export async function getCipherRawLogs(
+  publicClient: PublicClient,
+  cipherContractAddress: string,
+  fromBlock: bigint,
+  toBlock: bigint
+) {
+  const logs = await publicClient.getLogs({
     address: cipherContractAddress as any as `0x${string}`,
     event: NewCommitmentAbiItem,
     fromBlock,
     toBlock,
-  });
-
-  const logs = await publicClient.getFilterLogs({
-    filter,
-  });
+  })
   return logs;
 }
 
