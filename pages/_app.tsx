@@ -3,7 +3,13 @@ import "@rainbow-me/rainbowkit/styles.css";
 import "../styles/globals.css";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { mainnet, goerli, arbitrumGoerli, scrollSepolia } from "wagmi/chains";
+import {
+  mainnet,
+  goerli,
+  arbitrumGoerli,
+  scrollSepolia,
+  mantleTestnet,
+} from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -18,7 +24,7 @@ import { ConfigProvider } from "../providers/ConfigProvider";
 /* ============== rainbowkit & wagmi config ============== */
 
 const { chains, publicClient } = configureChains(
-  [goerli, arbitrumGoerli, scrollSepolia],
+  [goerli, arbitrumGoerli, scrollSepolia, mantleTestnet],
   [
     alchemyProvider({ apiKey: getString(process.env.NEXT_PUBLIC_ALCHEMY_ID) }),
     publicProvider(),

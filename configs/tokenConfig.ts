@@ -97,3 +97,13 @@ export const SCROLL_SEPOLIA_TOKEN_CONFIG: TokenConfig[] = [
     amountTable: [0.01, 0.1, 1, 10],
   },
 ];
+
+export const MANTLE_TESTNET_TOKEN_CONFIG: TokenConfig[] = [
+  {
+    iconUri: ethIcon,
+    address: DEFAULT_NATIVE_TOKEN_ADDRESS,
+    symbol: "ETH",
+    decimals: 18,
+    amountTable: [0.01, 0.1, 1, 10],
+  },
+];
