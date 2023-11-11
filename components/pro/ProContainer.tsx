@@ -34,6 +34,11 @@ export default function ProContainer() {
   }, [chain]);
 
   useEffect(() => {
+    if (!tokens) return;
+    setSelectedToken(tokens[0]);
+  }, [tokens]);
+
+  useEffect(() => {
     if (!address) return;
     if (selectedToken?.address === DEFAULT_NATIVE_TOKEN_ADDRESS) {
       setBalance(ethBalance?.value || 0n);
@@ -62,7 +67,7 @@ export default function ProContainer() {
    */
 
   return (
-    <CipherTxProvider tokenAddress={selectedToken?.address}>
+    <CipherTxProvider selectedToken={selectedToken}>
       <CipherTxProviderContext.Consumer>
         {({
           publicInAmt,

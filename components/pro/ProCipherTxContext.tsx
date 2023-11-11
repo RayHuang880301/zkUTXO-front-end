@@ -23,6 +23,7 @@ import dayjs from "dayjs";
 import {
   useAccount,
   useContractWrite,
+  useNetwork,
   usePrepareContractWrite,
   useWaitForTransaction,
 } from "wagmi";
@@ -32,6 +33,7 @@ import CipherAbi from "../../lib/cipher/CipherAbi.json";
 import { DEFAULT_NATIVE_TOKEN_ADDRESS } from "../../configs/tokenConfig";
 import { downloadCipher } from "../../lib/downloadCipher";
 import { encodeCipherCode } from "../../lib/cipher/CipherHelper";
+import { TokenConfig } from "../../type";
 
 export const CipherTxProviderContext = createContext<{
   publicInAmt: bigint;
@@ -76,10 +78,10 @@ export const CipherTxProviderContext = createContext<{
 });
 
 export const CipherTxProvider = ({
-  tokenAddress,
+  selectedToken,
   children,
 }: {
-  tokenAddress: string | null;
+  selectedToken: TokenConfig | null;
   children: React.ReactNode;
 }) => {
   const toast = useToast();
@@ -88,6 +90,7 @@ export const CipherTxProvider = ({
     CipherTreeProviderContext
   );
   const { address } = useAccount();
+  const { chain } = useNetwork();
 
   const [publicInAmt, setPublicInAmt] = useState(BigInt(0));
   const [publicOutAmt, setPublicOutAmt] = useState(BigInt(0));
@@ -130,7 +133,10 @@ export const CipherTxProvider = ({
     abi: CipherAbi.abi,
     functionName: "cipherTransact",
     args: [utxoData, publicInfo],
-    value: tokenAddress === DEFAULT_NATIVE_TOKEN_ADDRESS ? publicInAmt : 0n,
+    value:
+      selectedToken?.address === DEFAULT_NATIVE_TOKEN_ADDRESS
+        ? publicInAmt
+        : 0n,
     enabled: utxoData && publicInfo ? true : false,
     type: cipherContractInfo?.legacyTx ? "legacy" : undefined,
   });
@@ -148,7 +154,7 @@ export const CipherTxProvider = ({
 
   /** */
   const validate = useCallback(() => {
-    if (!tokenAddress) {
+    if (!selectedToken) {
       throw new Error("Token address is not set");
     }
 
@@ -182,7 +188,7 @@ export const CipherTxProvider = ({
     privateOutCoins.length,
     publicInAmt,
     publicOutAmt,
-    tokenAddress,
+    selectedToken?.address,
     totalPrivateInAmt,
     totalPrivateOutAmt,
   ]);
@@ -191,7 +197,7 @@ export const CipherTxProvider = ({
     try {
       await validate();
       const privateOutCoinArr = privateOutCoins.map(
-        (coinInfo) => new CipherOutputCoin(coinInfo!, tokenAddress!)
+        (coinInfo) => new CipherOutputCoin(coinInfo!, selectedToken!.address)
       );
 
       const allCodes = privateOutCoinArr.map((coin) => {
@@ -199,7 +205,7 @@ export const CipherTxProvider = ({
       });
 
       for (let i = 0; i < allCodes.length; i++) {
-        downloadCipher(allCodes[i]);
+        downloadCipher(chain!.id, selectedToken!.address, allCodes[i]);
       }
     } catch (error: any) {
       toast({
@@ -211,22 +217,22 @@ export const CipherTxProvider = ({
         position: "top",
       });
     }
-  }, [privateOutCoins, toast, tokenAddress, validate]);
+  }, [privateOutCoins, toast, selectedToken, validate]);
 
   const prepareProof = async () => {
     await validate();
 
-    const { promise } = await syncAndGetCipherTree(tokenAddress!);
+    const { promise } = await syncAndGetCipherTree(selectedToken!.address);
     const treeCache = await promise;
 
     const privateOutCoinArr = privateOutCoins.map(
-      (coinInfo) => new CipherOutputCoin(coinInfo!, tokenAddress!)
+      (coinInfo) => new CipherOutputCoin(coinInfo!, selectedToken!.address)
     );
     const publicInfo: PublicInfoStruct = {
       maxAllowableFeeRate: "0",
       recipient: address as string,
       // recipient: recipient || "",
-      token: tokenAddress!,
+      token: selectedToken!.address,
       deadline: dayjs().add(1, "month").unix().toString(),
     };
 
