@@ -126,6 +126,7 @@ export const useCipherCodeItem = ({
     message: string;
     data: Record<string, any>;
   };
+  resetResult: () => void;
 } => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [cipherCode, setCipherCode] = useState<string>(defaultCipherCode || "");  
@@ -184,7 +185,7 @@ export const useCipherCodeItem = ({
         error: errInfo,
       }
     }
-  }, [cipherCode, getUnPaidIndexFromTree, syncAndGetCipherTree]);
+  }, [cipherAccount, cipherCode, getUnPaidIndexFromTree, selectedTokenAddress, syncAndGetCipherTree]);
 
   return {
     isLoading,
@@ -193,5 +194,6 @@ export const useCipherCodeItem = ({
     transferableCoin,
     error,
     checkValid,
+    resetResult,
   }
 }

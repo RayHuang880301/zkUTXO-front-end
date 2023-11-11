@@ -4,7 +4,7 @@ import { parseUnits } from "viem";
 import { TokenConfig } from "../../type";
 
 type Props = {
-  // amount: bigint | undefined;
+  amount: bigint | undefined;
   onAmountChange: React.Dispatch<React.SetStateAction<bigint | undefined>>;
   selectedToken: TokenConfig;
   maxAmt?: number;
@@ -12,7 +12,6 @@ type Props = {
 
 export default function AmountSelector(props: Props) {
   const { onAmountChange, selectedToken, maxAmt } = props;
-  const [amount, setAmount] = useState<bigint | undefined>(undefined);
 
   const [numberInputValue, setNumberInputValue] = useState<
     string | undefined
@@ -22,7 +21,7 @@ export default function AmountSelector(props: Props) {
 
   const _setAmount = (amt: bigint) => {
     onAmountChange(amt);
-    setAmount(amt);
+    // setAmount(amt);
   };
 
   const handleNumberInputChange = useCallback(
@@ -58,9 +57,9 @@ export default function AmountSelector(props: Props) {
         selectedAmt.toString(),
         selectedToken.decimals
       );
-      return rawAmount === BigInt(amount || 0);
+      return rawAmount === BigInt(props.amount || 0);
     },
-    [amount, selectedToken.decimals]
+    [props.amount, selectedToken.decimals]
   );
 
   const AmtBtnComponents = useMemo(() => {

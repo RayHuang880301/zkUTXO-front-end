@@ -23,7 +23,7 @@ type Props = {
 export default function PrivateInputBox({ selectedToken }: Props) {
   const toast = useToast();
   const [nIns, setNIns] = useState(1);
-  const { publicInAmt, totalPrivateInAmt, setPrivateInCoins } = useContext(
+  const { publicInAmt, totalPrivateInAmt, setPrivateInCoins, useResetAllListener } = useContext(
     CipherTxProviderContext
   );
   const [transferableCoinMap, setTransferableCoinMap] = useState<
@@ -107,7 +107,7 @@ export default function PrivateInputBox({ selectedToken }: Props) {
       items.push(item);
     }
     return items;
-  }, [nIns, cipherCodeMap, transferableCoinMap]);
+  }, [nIns, transferableCoinMap, cipherCodeMap, selectedToken]);
 
   const removeItem = useCallback((index: number) => {
     setNIns(nIns - 1);
@@ -140,28 +140,22 @@ export default function PrivateInputBox({ selectedToken }: Props) {
     });
   }, [nIns, setPrivateInCoins]);
 
-  // const inputBox = useMemo(() => {
-  //   return inputCoinItems.map(({ Element }, idx) => (
-  //     <Flex className="flex flex-row items-start w-full gap-8" key={idx}>
-  //       {Element}
-  //       <Image
-  //         className="my-2"
-  //         boxSize={"8"}
-  //         src={dropImg.src}
-  //         alt="drop-image"
-  //         _hover={{
-  //           cursor: "pointer",
-  //           transform: "scale(1.1)",
-  //         }}
-  //         _active={{
-  //           transform: "scale(0.9)",
-  //         }}
-  //         transitionDuration={"0.2s"}
-  //         onClick={() => removeItem(idx)}
-  //       />
-  //     </Flex>
-  //   ))
-  // }, [inputCoinItems, removeItem]);
+  const reset = () => {
+    const emptyTransferableCoinMap = new Map<string, CipherTransferableCoin | undefined>();
+    const emptyCipherCodeMap = new Map<string, string>();
+    for(let i = 0; i < nIns; i++) {
+      emptyTransferableCoinMap.set(i.toString(), undefined);
+      emptyCipherCodeMap.set(i.toString(), '');
+    }
+    setTransferableCoinMap(emptyTransferableCoinMap);
+    setCipherCodeMap(emptyCipherCodeMap);
+  }
+
+  useResetAllListener(() => {
+    console.log('reset PrivateInputBox');
+    reset();
+    setNIns(0);
+  });
 
   return (
     <Flex

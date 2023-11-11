@@ -1,11 +1,12 @@
 import { Button, Flex, useDisclosure, useToast } from "@chakra-ui/react";
-import React from "react";
+import React, { useContext } from "react";
 import { TokenConfig } from "../../type";
 import TokenSelector from "../shared/TokenSelector";
 import PublicInputModal from "./PublicInputModal";
 import { formatUnits } from "viem";
 import PublicOutputModal from "./PublicOutputModal";
 import { useAccount } from "wagmi";
+import { CipherTxProviderContext } from "./ProCipherTxContext";
 
 type Props = {
   balance: bigint | undefined;
@@ -46,6 +47,9 @@ export default function SelectBox(props: Props) {
   } = useDisclosure();
   const toast = useToast();
   const { address } = useAccount();
+  const { useResetAllListener } = useContext(
+    CipherTxProviderContext
+  );
 
   const resetPublicInput = () => {
     setPublicInAmt(0n);
@@ -86,6 +90,16 @@ export default function SelectBox(props: Props) {
       onOpenPublicOutModal();
     }
   };
+
+  const reset = () => {
+    setPublicInAmt(0n);
+    setPublicOutAmt(0n);
+  }
+
+  useResetAllListener(() => {
+    console.log('reset SelectBox');
+    reset();
+  });
 
   return (
     <Flex

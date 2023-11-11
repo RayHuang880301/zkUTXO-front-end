@@ -1,5 +1,5 @@
 import { Button, Flex, Image, useToast } from "@chakra-ui/react";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { TokenConfig } from "../../type";
 import { CipherTxProviderContext } from "./ProCipherTxContext";
 import { CipherOutputCoinInfo } from "../../lib/cipher/CipherCoin";
@@ -22,7 +22,7 @@ export default function PrivateOutputBox(props: Props) {
   const { selectedToken } = props;
   const toast = useToast();
   const [mOuts, setMOuts] = useState(1);
-  const { publicOutAmt, totalPrivateOutAmt, setPrivateOutCoins } = useContext(
+  const { setPrivateOutCoins, useResetAllListener } = useContext(
     CipherTxProviderContext
   );
 
@@ -46,11 +46,18 @@ export default function PrivateOutputBox(props: Props) {
         console.log("onUpdateCoin", index, coin);
         setCoinInfoMap((prev) => new Map(prev).set(index.toString(), coin));
       };
+      const coin = coinInfoMap.get(index.toString());
+      console.log({
+        coin,
+        selectedToken,
+        onUpdateCoin,
+      })
       const item: InputItemInterface = {
-        coin: null,
+        coin: coin ? coin : null,
         Element: (
           <PrivateOutputItem
             key={index}
+            coin={coin ? coin : undefined}
             selectedToken={selectedToken}
             onUpdateCoin={onUpdateCoin}
           />
@@ -76,50 +83,51 @@ export default function PrivateOutputBox(props: Props) {
     }
   };
 
+  const removeItem = useCallback((index: number) => {
+    setMOuts(mOuts - 1);
+    setCoinInfoMap((prev) => {
+      const prevArr = Array.from(prev).sort((a, b) => {
+        return parseInt(a[0]) - parseInt(b[0]);
+      }).map((item) => item[1]);
+      prevArr.splice(index, 1);
+      const next = new Map();
+      prevArr.forEach((item, idx) => {
+        if(item) {
+          next.set(idx.toString(), item);
+        }
+      });
+      setPrivateOutCoins(Array.from(next.values()));
+      return next;
+    });
+  }, [mOuts, setPrivateOutCoins]);
+
+  const reset = () => {
+    const newMap = new Map();
+    for(let index = 0; index < mOuts; index++) {
+      newMap.set(index.toString(), null);
+    }
+    setCoinInfoMap(newMap);
+    setPrivateOutCoins(Array.from(newMap.values()));
+  }
+
+  useResetAllListener(() => {
+    console.log('reset PrivateOutputBox');
+    reset();
+    setMOuts(0);
+  });
+
   return (
     <Flex
       className="flex flex-col w-full rounded-3xl py-6 px-12 h-fit"
       bgColor="whiteAlpha.400"
       backdropFilter="blur(10px)"
     >
-      {/* {selectedToken ? (
-        <h3 className="text-center">
-          TOTAL:{" "}
-          {formatUnits(
-            publicOutAmt + totalPrivateOutAmt,
-            selectedToken.decimals
-          )}{" "}
-          {selectedToken?.symbol}
-        </h3>
-      ) : (
-        <></>
-      )} */}
-      {/* <Flex className="flex justify-center gap-2 my-4">
-        {mOutsNum.map((num) => (
-          <Button
-            key={num}
-            colorScheme="blue"
-            borderRadius="md"
-            fontSize={"xs"}
-            h={"1.2rem"}
-            w={"1rem"}
-            _hover={{
-              transform: "scale(1.1)",
-            }}
-            _active={{
-              transform: "scale(0.9)",
-            }}
-            transitionDuration={"0.2s"}
-            onClick={() => setMOuts(num)}
-          >
-            {num}
-          </Button>
-        ))}
-      </Flex> */}
       <Flex className="flex w-full mx-auto flex-col items-center gap-2">
         {outCoinInfoItems.map(({ Element }, idx) => (
           <Flex key={idx} className="flex flex-row items-start w-full gap-8">
             {Element}
+
+
             <Image
               className="my-2"
               boxSize={"8"}
@@ -133,7 +141,7 @@ export default function PrivateOutputBox(props: Props) {
                 transform: "scale(0.9)",
               }}
               transitionDuration={"0.2s"}
-              onClick={() => setMOuts(mOuts - 1)}
+              onClick={() => removeItem(idx)}
             />
           </Flex>
         ))}

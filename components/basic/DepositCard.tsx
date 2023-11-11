@@ -141,6 +141,7 @@ export default function DepositCard(props: Props) {
           setSelectedToken={setSelectedToken}
         />
         <AmountSelector
+          amount={pubInAmt}
           selectedToken={selectedToken}
           onAmountChange={setPubInAmt}
           balance={balance}

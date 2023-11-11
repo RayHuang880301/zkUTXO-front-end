@@ -216,7 +216,7 @@ export const CipherTreeProvider = ({
     if (!cipherTreeDataCollector) return undefined;
     const key = getTreeSyncingQueueKey(cipherTreeDataCollector, tokenAddress);
     return TreeSyncingQueue.get(key);
-  }, []);
+  }, [cipherTreeDataCollector]);
 
   const stopSyncingTreeQueue = useCallback(
     (tokenAddress: string) => {

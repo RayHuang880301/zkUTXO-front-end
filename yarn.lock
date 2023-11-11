@@ -7611,6 +7611,11 @@ react-dom@18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
 
+react-event-hook@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/react-event-hook/-/react-event-hook-3.1.2.tgz#445e8f3b751f6abe4ef199f31bff47593c4c13d4"
+  integrity sha512-qQ9LXLdxmWRRZPlnqVjqlw7jovSvDosQEOyQ9cjPHhtDv8JIszjj0td1PuHJHrVW0LS8a1XeJhLe6i7S5u9SbQ==
+
 react-fast-compare@3.2.2:
   version "3.2.2"
   resolved "https://registry.npmjs.org/react-fast-compare/-/react-fast-compare-3.2.2.tgz"

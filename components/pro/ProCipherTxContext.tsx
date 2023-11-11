@@ -31,7 +31,8 @@ import { ConfigContext } from "../../providers/ConfigProvider";
 import CipherAbi from "../../lib/cipher/CipherAbi.json";
 import { DEFAULT_NATIVE_TOKEN_ADDRESS } from "../../configs/tokenConfig";
 import { downloadCipher } from "../../lib/downloadCipher";
-import { encodeCipherCode } from "../../lib/cipher/CipherHelper";
+import { createEvent } from "react-event-hook";
+
 
 export const CipherTxProviderContext = createContext<{
   publicInAmt: bigint;
@@ -53,6 +54,8 @@ export const CipherTxProviderContext = createContext<{
   transactIsSuccess: boolean;
   sendTransaction: () => Promise<void>;
   transactReset: () => void;
+  useResetAllListener: (handler: () => void) => void,
+  emitResetAll: () => void;
 }>({
   publicInAmt: BigInt(0),
   setPublicInAmt: () => {},
@@ -73,6 +76,8 @@ export const CipherTxProviderContext = createContext<{
   transactIsSuccess: false,
   sendTransaction: async () => {},
   transactReset: () => {},
+  useResetAllListener: () => {},
+  emitResetAll: () => {},
 });
 
 export const CipherTxProvider = ({
@@ -83,6 +88,7 @@ export const CipherTxProvider = ({
   children: React.ReactNode;
 }) => {
   const toast = useToast();
+  const { useResetAllListener, emitResetAll } = createEvent("resetAll")();
 
   const { syncAndGetCipherTree, getUnPaidIndexFromTree } = useContext(
     CipherTreeProviderContext
@@ -141,7 +147,7 @@ export const CipherTxProvider = ({
     reset: transactReset,
   } = useContractWrite(contractTxConfig);
 
-  const { isLoading: transactIsLoading, isSuccess: transactIsSuccess } =
+  const { isLoading: _transactIsLoading, isSuccess: transactIsSuccess } =
     useWaitForTransaction({
       hash: transactTx?.hash,
     });
@@ -252,6 +258,10 @@ export const CipherTxProvider = ({
     await transactAsync();
   };
 
+  const transactIsLoading = useMemo(() => {
+    return _transactIsLoading || !transactAsync;
+  }, [_transactIsLoading, transactAsync]);
+
   return (
     <CipherTxProviderContext.Provider
       value={{
@@ -274,6 +284,8 @@ export const CipherTxProvider = ({
         transactIsSuccess,
         sendTransaction,
         transactReset,
+        useResetAllListener,
+        emitResetAll,
       }}
     >
       {children}

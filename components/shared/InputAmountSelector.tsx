@@ -6,6 +6,7 @@ import AmountSelector from "./AmountSelector";
 import { formatUnits } from "viem";
 
 type Props = {
+  amount: bigint | undefined;
   onAmountChange: React.Dispatch<React.SetStateAction<bigint | undefined>>;
   selectedToken: TokenConfig;
   balance: bigint | undefined;
@@ -23,6 +24,7 @@ export default function InputAmountSelector(props: Props) {
           : 0}
       </Text>
       <AmountSelector
+        amount={props.amount}
         onAmountChange={onAmountChange}
         selectedToken={selectedToken}
         maxAmt={

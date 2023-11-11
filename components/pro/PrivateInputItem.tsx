@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useContext, useEffect, useMemo, useState } from "react";
 import { useCipherCodeItem } from "../../hooks/useCipherCodeItem";
 import { CipherTransferableCoin } from "../../lib/cipher/CipherCoin";
 import CipherCard from "../shared/CipherCard";
@@ -6,6 +6,7 @@ import { Flex, Text } from "@chakra-ui/react";
 import { useDebounce, useThrottle } from "@uidotdev/usehooks";
 import { formatUnits } from "viem";
 import { TokenConfig } from "../../type";
+import { CipherTxProviderContext } from "./ProCipherTxContext";
 
 type Props = {
   selectedToken: TokenConfig;
@@ -24,19 +25,18 @@ export default function PrivateInputItem(props: Props) {
     setCipherCode,
     checkValid,
     error,
+    resetResult,
   } = useCipherCodeItem({
     selectedTokenAddress: selectedToken.address,
     defaultCipherCode: props.cipherCode,
   });
-  // const [isValid, setIsValid] = useState<boolean>(true);
 
   const debouncedCipherCode = useDebounce(cipherCode, 800);
-
   useEffect(() => {
     if (cipherCode !== props.cipherCode) {
       setCipherCode(props.cipherCode || "");
     }
-  }, [props]);
+  }, [cipherCode, props, setCipherCode]);
 
   useEffect(() => {
     if (props.onUpdateCoin) {

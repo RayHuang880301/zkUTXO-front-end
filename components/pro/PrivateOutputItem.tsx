@@ -9,8 +9,8 @@ import {
   useDisclosure,
   Tooltip,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import { parseUnits } from "viem";
+import React, { useCallback, useEffect, useState } from "react";
+import { formatUnits, parseUnits } from "viem";
 import { CipherOutputCoinInfo } from "../../lib/cipher/CipherCoin";
 import { getRandomSnarkField } from "../../utils/getRandom";
 import { encodeCipherCode } from "../../lib/cipher/CipherHelper";
@@ -21,6 +21,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   selectedToken: TokenConfig;
+  coin?: CipherOutputCoinInfo;
   onUpdateCoin?: (coin: CipherOutputCoinInfo | null) => void;
 };
 
@@ -29,11 +30,13 @@ export default function PrivateOutputItem(props: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [cipherCode, setCipherCode] = useState<string>("");
   const [isCustomizedAmt, setIsCustomizedAmt] = useState<boolean>(false);
-  const [pubInAmt, setPubInAmt] = useState<bigint>(0n);
+  const [pubInAmt, setPubInAmt] = useState<bigint>(props.coin ? props.coin.amount : 0n);
   const [numberInputValue, setNumberInputValue] = useState<
     string | undefined
-  >();
-  const [userId, setUserId] = useState<string>();
+  >(props.coin?.amount && selectedToken.decimals ? formatUnits(props.coin?.amount, selectedToken.decimals) : undefined);
+  const [userId, setUserId] = useState<string>(
+    props.coin?.key.userId ? props.coin?.key.userId.toString() : ""
+  );
   const [show, setShow] = useState(false);
   const [cipherCoinInfo, setCipherCoinInfo] = useState<CipherOutputCoinInfo>({
     key: {
@@ -84,13 +87,13 @@ export default function PrivateOutputItem(props: Props) {
     }
   }, [userId, debouncedPubInAmt, selectedToken, onUpdateCoin]);
 
-  const isSelectedBtnActive = (selectedAmt: number) => {
+  const isSelectedBtnActive = useCallback((selectedAmt: number) => {
     const rawAmount = parseUnits(
       selectedAmt.toString(),
       selectedToken.decimals
     );
     return rawAmount === pubInAmt ? 1 : 0;
-  };
+  }, [pubInAmt, selectedToken]);
 
   const handleSelectedAmtBtnClicked = (amt: number) => {
     setNumberInputValue(amt?.toString());

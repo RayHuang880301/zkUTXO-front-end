@@ -76,6 +76,7 @@ export default function ProContainer() {
           downloadCipherCodes,
           sendTransaction,
           prepareProof,
+          emitResetAll,
         }) => {
           return (
             <Flex
@@ -83,6 +84,7 @@ export default function ProContainer() {
               overflow={"scroll"}
             >
               <Flex className="flex flex-col">
+                {/* <button onClick={() => emitResetAll()}>RESET</button> */}
                 <SelectBox
                   balance={balance}
                   publicInAmt={publicInAmt}

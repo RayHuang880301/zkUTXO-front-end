@@ -88,6 +88,7 @@ export default function ConfirmModal(props: Props) {
     transactIsSuccess,
     sendTransaction,
     transactReset,
+    emitResetAll,
   } = useContext(CipherTxProviderContext);
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [isDownloaded, setIsDownloaded] = useState<boolean>(false);
@@ -237,6 +238,7 @@ export default function ConfirmModal(props: Props) {
     try {
       await sendTransaction();
     } catch (err) {
+      console.error(err);
       toast({
         title: "Transaction failed",
         description: "",
@@ -246,7 +248,7 @@ export default function ConfirmModal(props: Props) {
         position: "top",
       });
     }
-  }, [onPrepareProof, sendTransaction]);
+  }, [sendTransaction, toast]);
 
   const handleIsChecked = () => {
     if (!isChecked) {
@@ -268,6 +270,7 @@ export default function ConfirmModal(props: Props) {
     resetApprove();
     setIsApproved(false);
     onClose();
+    emitResetAll();
   };
 
   const downloadCipherCodeByIndex = async (index: number) => {
