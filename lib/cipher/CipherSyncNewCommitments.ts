@@ -45,16 +45,18 @@ export class CipherTreeDataCollector {
   ) {
     if(!this.config.cipherContractAddress) return Promise.reject("cipherContractAddress is undefined");
     return new Promise<TreeCacheItem>(async (resolve, reject) => {
-      try {
-        const result = await this.syncNewCommitmentFromSubgraph(
-          treeCacheItem,
-          context
-        );
-        return resolve(result);
-      } catch (subGraphError) {
-        console.error(
-          "syncNewCommitmentFromSubgraph error, try syncNewCommitmentFromRpc"
-        );
+      if(this.config.subgraphUrl) {
+        try {
+          const result = await this.syncNewCommitmentFromSubgraph(
+            treeCacheItem,
+            context
+          );
+          return resolve(result);
+        } catch (subGraphError) {
+          console.error(
+            "syncNewCommitmentFromSubgraph error, try syncNewCommitmentFromRpc"
+          );
+        }
       }
   
       try {
