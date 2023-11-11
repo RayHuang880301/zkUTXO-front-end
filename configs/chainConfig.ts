@@ -1,6 +1,6 @@
 import { ChainConfig } from "../type";
 import { getBigInt, getNumber, getString } from "../utils/helper";
-import { mainnet, goerli, arbitrumGoerli } from "wagmi/chains";
+import { mainnet, goerli, arbitrumGoerli, scrollSepolia } from "wagmi/chains";
 
 // TODO: MIGRATE FROM .env
 export const getChainConfig = (chainId: number): ChainConfig | undefined => {
@@ -11,6 +11,8 @@ export const getChainConfig = (chainId: number): ChainConfig | undefined => {
       return GOERLI_CONFIG;
     case arbitrumGoerli.id:
       return ARBITRUM_GOERLI_CONFIG;
+    case scrollSepolia.id:
+      return SCROLL_SEPOLIA_CONFIG;
     default:
       return undefined;
   }
@@ -70,6 +72,28 @@ export const ARBITRUM_GOERLI_CONFIG: ChainConfig = {
   ),
   syncBlockBatchSize: getNumber(
     process.env.NEXT_PUBLIC_ARBITRUM_GOERLI_CIPHER_SYNC_LOGS_BATCH_BLOCK_SIZE,
+    {
+      defaultVal: "1000",
+    }
+  ),
+};
+
+export const SCROLL_SEPOLIA_CONFIG: ChainConfig = {
+  chainId: 534351,
+  cipherContractAddress: getString(
+    process.env.NEXT_PUBLIC_SCROLL_SEPOLIA_CIPHER_CONTRACT_ADDRESS
+  ) as `0x${string}`,
+  startBlock: getBigInt(
+    process.env.NEXT_PUBLIC_SCROLL_SEPOLIA_CIPHER_START_BLOCK_NUMBER
+  ),
+  subgraphUrl: getString(
+    process.env.NEXT_PUBLIC_SCROLL_SEPOLIA_CIPHER_SUBGRAPH_URL,
+    {
+      required: false,
+    }
+  ),
+  syncBlockBatchSize: getNumber(
+    process.env.NEXT_PUBLIC_SCROLL_SEPOLIA_CIPHER_SYNC_LOGS_BATCH_BLOCK_SIZE,
     {
       defaultVal: "1000",
     }
