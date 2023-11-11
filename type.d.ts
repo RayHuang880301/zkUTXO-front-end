@@ -22,6 +22,7 @@ export type ChainConfig = {
   startBlock: bigint;
   subgraphUrl?: string;
   syncBlockBatchSize: number;
+  legacyTx?: boolean;
 };
 
 export type TokenConfig = {

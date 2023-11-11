@@ -120,6 +120,7 @@ export const CipherTxProvider = ({
     args: [utxoData, publicInfo],
     value: tokenAddress === DEFAULT_NATIVE_TOKEN_ADDRESS ? publicInAmt : 0n,
     enabled: utxoData && publicInfo ? true : false,
+    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
   });
   const {
     data: transactTx,

@@ -112,6 +112,7 @@ export default function ConfirmModal(props: Props) {
       selectedToken.address !== DEFAULT_NATIVE_TOKEN_ADDRESS
         ? true
         : false,
+    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
   });
   // approve
   const {
