@@ -7,22 +7,17 @@ import {
   Button,
   Image,
   useDisclosure,
-  Input,
   Tooltip,
 } from "@chakra-ui/react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { formatUnits, parseUnits } from "viem";
-import { CipherCoinInfo, CipherOutputCoinInfo } from "../../lib/cipher/CipherCoin";
+import React, { useEffect, useState } from "react";
+import { parseUnits } from "viem";
+import { CipherOutputCoinInfo } from "../../lib/cipher/CipherCoin";
 import { getRandomSnarkField } from "../../utils/getRandom";
-import { encodeCipherCode, toHashedSalt } from "../../lib/cipher/CipherHelper";
+import { encodeCipherCode } from "../../lib/cipher/CipherHelper";
 import addUser from "../../assets/images/addUser.png";
 import RecipientModal from "./RecipientModal";
-import showImage from "../../assets/images/hide1.png";
-import hideImage from "../../assets/images/hide2.png";
 import { BigNumber } from "ethers";
 import { useDebounce } from "@uidotdev/usehooks";
-
-const amountTable = [0.01, 0.1, 1, 10];
 
 type Props = {
   selectedToken: TokenConfig;
@@ -132,7 +127,7 @@ export default function PrivateOutputItem(props: Props) {
             </NumberInput>
           ) : (
             <Flex className="gap-2 my-1 w-full justify-between">
-              {amountTable.map((selectedAmt) => (
+              {selectedToken.amountTable.map((selectedAmt) => (
                 <Button
                   key={selectedAmt}
                   borderRadius="3xl"
