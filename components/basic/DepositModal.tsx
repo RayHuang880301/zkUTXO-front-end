@@ -131,6 +131,7 @@ export default function DepositModal(props: Props) {
       token.address !== DEFAULT_NATIVE_TOKEN_ADDRESS
         ? true
         : false,
+    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
   });
   // approve
   const {
@@ -151,6 +152,8 @@ export default function DepositModal(props: Props) {
     args: [proof, publicInfo],
     value: token.address === DEFAULT_NATIVE_TOKEN_ADDRESS ? pubInAmt : 0n,
     enabled: proof && publicInfo ? true : false,
+    // gas: 3000000n,
+    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
   });
 
   const {

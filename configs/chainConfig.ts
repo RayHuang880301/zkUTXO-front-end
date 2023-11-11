@@ -100,6 +100,7 @@ export const SCROLL_SEPOLIA_CONFIG: ChainConfig = {
       defaultVal: "1000",
     }
   ),
+  legacyTx: true,
 };
 
 export const MANTLE_TESTNET_CONFIG: ChainConfig = {
@@ -121,7 +122,7 @@ export const MANTLE_TESTNET_CONFIG: ChainConfig = {
     {
       defaultVal: "1000",
     }
-  ),
+  )
 };
 
 console.log({
