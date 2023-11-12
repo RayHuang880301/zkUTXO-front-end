@@ -25,7 +25,11 @@ import React, { useContext, useEffect, useState } from "react";
 import { TokenConfig } from "../../type";
 import CipherCard from "../shared/CipherCard";
 import dayjs from "dayjs";
-import { CipherBaseCoin, CipherCoinInfo, CipherOutputCoin } from "../../lib/cipher/CipherCoin";
+import {
+  CipherBaseCoin,
+  CipherCoinInfo,
+  CipherOutputCoin,
+} from "../../lib/cipher/CipherCoin";
 import { generateCipherTx } from "../../lib/cipher/CipherCore";
 import { CipherTree } from "../../lib/cipher/CipherTree";
 import { erc20ABI, useAccount, useNetwork, useWaitForTransaction } from "wagmi";
@@ -42,7 +46,6 @@ import { downloadCipher } from "../../lib/downloadCipher";
 import { assert } from "../../lib/helper";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import { ConfigContext } from "../../providers/ConfigProvider";
-import SimpleBtn from "../shared/SimpleBtn";
 
 type Props = {
   isOpen: boolean;
@@ -93,8 +96,6 @@ export default function DepositModal(props: Props) {
     address
   );
 
-  console.log("public in amt", pubInAmt);
-
   const handleCloseModal = () => {
     setIsDownloaded(false);
     setIsApproved(false);
@@ -131,7 +132,7 @@ export default function DepositModal(props: Props) {
       token.address !== DEFAULT_NATIVE_TOKEN_ADDRESS
         ? true
         : false,
-    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
+    type: cipherContractInfo?.legacyTx ? "legacy" : undefined,
   });
   // approve
   const {
@@ -153,7 +154,7 @@ export default function DepositModal(props: Props) {
     value: token.address === DEFAULT_NATIVE_TOKEN_ADDRESS ? pubInAmt : 0n,
     enabled: proof && publicInfo ? true : false,
     // gas: 3000000n,
-    type: cipherContractInfo?.legacyTx ? 'legacy' : undefined,
+    type: cipherContractInfo?.legacyTx ? "legacy" : undefined,
   });
 
   const {
@@ -179,7 +180,7 @@ export default function DepositModal(props: Props) {
   // const { write: initTokenTree } = useContractWrite(initTokenTreeConfig);
 
   const handleDownload = () => {
-    downloadCipher(cipherHex);
+    downloadCipher(chain!.id, token.symbol, cipherHex);
     // delay 1 second
     setTimeout(() => {
       setIsDownloaded(true);
@@ -318,14 +319,19 @@ export default function DepositModal(props: Props) {
         publicOutAmt: 0n,
         privateInCoins: [],
         // TODO: get leafId
-        privateOutCoins: [new CipherOutputCoin({
-          key: {
-            salt: cipherCoinInfo.key.inSaltOrSeed!,
-            random: cipherCoinInfo.key.inRandom,
-            userId: 0n,
-          },
-          amount: cipherCoinInfo.amount,
-        }, tree.tokenAddress)],
+        privateOutCoins: [
+          new CipherOutputCoin(
+            {
+              key: {
+                salt: cipherCoinInfo.key.inSaltOrSeed!,
+                random: cipherCoinInfo.key.inRandom,
+                userId: 0n,
+              },
+              amount: cipherCoinInfo.amount,
+            },
+            tree.tokenAddress
+          ),
+        ],
       },
       {
         // TODO: get maxAllowableFeeRate from relay info

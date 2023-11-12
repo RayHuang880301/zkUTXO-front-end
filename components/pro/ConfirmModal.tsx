@@ -286,7 +286,7 @@ export default function ConfirmModal(props: Props) {
       salt: coin.key.salt,
       userId: coin.key.userId,
     });
-    await downloadCipher(cipherCode);
+    await downloadCipher(chain!.id, selectedToken.symbol, cipherCode);
   };
 
   return (
